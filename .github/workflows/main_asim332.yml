@@ -1,47 +1,27 @@
-name: Deploy Static Web App to Azure - Asim332
+deploy:
+  runs-on: ubuntu-latest
+  needs: build
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  permissions:
+    id-token: write
+    contents: read
 
-jobs:
-  build:
-    runs-on: windows-latest
+  steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: web-app
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_628093C8DF7E41DCBD0C11C01CB3E896 }}
+        tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_EA0C73D32508470EB83FC647AB86F47C }}
+        subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_754A71272A7F468B9241C59E1CD4B95A }}
 
-      # No npm steps needed
-
-      - name: Upload artifact for deployment
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-app
-          path: .
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: web-app
-
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_628093C8DF7E41DCBD0C11C01CB3E896 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_EA0C73D32508470EB83FC647AB86F47C }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_754A71272A7F468B9241C59E1CD4B95A }}
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'Asim332'
-          slot-name: 'Production'
-          package: .
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: 'Asim332'
+        slot-name: 'Production'
+        package: .
